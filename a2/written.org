@@ -1,0 +1,184 @@
+#+latex_class_options: [10pt]
+
+*Assignment 2 - Written*: Understanding word2vec\\
+
+Notation:
+- $\bold{v}$ = input vector
+- $\bold{u}$ = output vector
+- $o$ = The index of the desired context (outside) word.
+- $w$ = The $w$ -th word in the vocabulary
+- $c$ = The index of the center word.\\
+
+Definitions:
+- The probability of an outside context word, $u_o$, given the center word is defined as:\\
+\[\hat{y}_o = p(\bold{u_o} | \bold{v_c}) = \frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in \text{Vocab}}e^{\bold{u_w}^T\bold{v_c}}}\]
+
+\newpage
+*(a)* Show that naive-softmax loss is the same as the cross-entropy loss between $y$ and $\hat{y}$, i.e. show that: 
+
+$$-\sum_{w \in Vocab} y_w log(\hat{y}_w) = -log(\hat{y}_{o})$$
+
+*Solution*: B/c $y$ is a one-hot encoded vector with zeros everywhere except at the index $w = o$ where $y_o=1$, the sum on the LHS breaks down as follows:
+
+\[
+-\sum_{w \in Vocab} y_w log(\hat{y}_w) 
+= -(y_1log(\hat{y}_1) + ... + y_olog(\hat{y}_o) + ... + y_{|V|}log(\hat{y}_{|V|}))
+= -log(\hat{y}_o)
+\]
+
+(*b)* Compute the partial derivative of $J_{Naive-Softmax}(\bold{v_c}, o, U)$ w.r.t. $\bold{v_c}$:
+
+*Solution*:
+#+BEGIN_LATEX
+\begin{align*}
+\frac{\partial J_{Naive-Softmax}}{\partial \bold{v_c}} 
+&= \frac{\partial}{\partial \bold{v_c}} [-log(\hat{y}_o)] \\
+&= \frac{\partial}{\partial \bold{v_c}} [-log(\frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}})] \\
+&= -\frac{\partial}{\partial \bold{v_c}} [log(e^{\bold{u_o}^T\bold{v_c}})- log(\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}})] \\
+&= -\frac{\partial}{\partial \bold{v_c}}[log(e^{\bold{u_o}^T\bold{v_c}})] + \frac{\partial}{\partial \bold{v_c}}[log(\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}})] \\
+&= -\frac{\partial}{\partial \bold{v_c}}[\bold{u_o}^T\bold{v_c}] + \frac{\partial}{\partial \bold{v_c}}[log(\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}})]\\
+&= -(\bold{u_o}) + (\frac{1}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}} \sum_{x \in Vocab}\bold{u_x} \cdot e^{\bold{u_x}^T\bold{v_c}}) \\
+&= -\bold{u_o} + \sum_{x \in Vocab} \frac{e^{\bold{u_x}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}} \bold{u_x}\\
+&= -\bold{u_o} + \sum_{x \in Vocab} p(\bold{u_x} | \bold{v_c}) \bold{u_x}\\
+&= -\bold{u_o} + \sum_{x \in Vocab} \hat{y}_x \bold{u_x}
+\end{align*}
+#+END_LATEX
+
+This says that the slope of the loss function w.r.t. the center word is equal to the difference between the observed representation of the outside context word and the expected context word according to our model.
+\newpage
+
+(*c)* Compute the partial derivatives of $J_{naive-softmax}(\bold{v_c}, o, U)$ w.r.t. each of the 'outside' word vectors, $\bold{u_w}$'s. There will be two cases: when $w=o$, the true 'outside' word vector, and $w \neq o$, for all other words. Please write your answer in terms of $y$, $\hat{y}$, and $\bold{v_c}$.
+
+*case 1 - the outside word vector is the true context word vector:*
+#+BEGIN_LATEX
+\begin{align*}
+\frac{\partial J_{naive-softmax}}{\partial u_{w=o}} 
+&= \frac{\partial}{\partial u_{w=o}} [-log(\hat{y}_o)] \\
+&= \frac{\partial}{\partial u_{w=o}} [-log(\frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}})] \\
+&= -\frac{\partial}{\partial u_{w=o}}[\bold{u_o}^T\bold{v_c}] + \frac{\partial}{\partial u_{w=o}}[log(\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}})] \\
+&= -(\bold{v_c}) + (\frac{1}{\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}}} (e^{\bold{u_o}^T\bold{v_c}} \cdot \bold{v_c}))\\
+&= \bold{v_c}(\hat{y_o} - 1)
+\end{align*}
+#+END_LATEX
+
+*case 2 - the outside word vector is any context word but the true one:*
+#+BEGIN_LATEX
+\begin{align*}
+\frac{\partial J_{naive-softmax}}{\partial \bold{u_{w \neq o}}} 
+&= \frac{\partial}{\partial \bold{u_{w \neq o}}} [-log(\hat{y}_o)] \\
+&= \frac{\partial}{\partial \bold{u_{w \neq o}}} [-log(\frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}})] \\
+&= -\frac{\partial}{\partial \bold{u_{w \neq o}}}[\bold{u_o}^T\bold{v_c}] + \frac{\partial}{\partial \bold{u_{w \neq o}}}[log(\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}})] \\
+&= 0 + (\frac{1}{\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}}} \cdot 
+e^{u_{w\neq o}^T\bold{v_c}} \cdot \bold{v_c}) \\
+&= \bold{v_c} \cdot \hat{y}_{w \neq o}
+\end{align*}
+#+END_LATEX
+
+\newpage
+
+(*d)* Compute the derivative of the sigmoid $\sigma(\textbf{x}) = \frac{1}{1 + e^{-\textbf{x}}} = \frac{e^{\textbf{x}}}{e^{\textbf{x}} + 1}$ w.r.t. $\textbf{x}$, where $\textbf{x}$ is a vector.
+
+*Solution:* 
+
+#+BEGIN_LATEX
+\begin{align*}
+\frac{d\sigma}{d\textbf{x}}
+&= \frac{d}{d\textbf{x}} [\frac{1}{1 + e^{-\textbf{x}}}] \\
+&= \frac{d}{d\textbf{x}} [(1 + e^{-\textbf{x}})^{-1}] \\
+&= [-(1 + e^{-\textbf{x}})^{-2}] [-e^{-\textbf{x}}] \\ 
+&= \frac{e^{-\textbf{x}}}{(1 + e^{-\textbf{x}})^{2}} \\
+&= (\frac{1}{1 + e^{-\textbf{x}}}) (\frac{e^{-\textbf{x}}}{1 + e^{-\textbf{x}}})\\
+&= (\frac{1}{1 + e^{-\textbf{x}}}) (\frac{e^{-\textbf{x}} + 1 - 1}{1 + e^{-\textbf{x}}}) \\
+&= (\frac{1}{1 + e^{-\textbf{x}}}) (\frac{e^{-\textbf{x}} + 1}{1 + e^{-\textbf{x}}} - \frac{1}{1 + e^{-\textbf{x}}}) \\
+&= \sigma(\textbf{x})(1 - \sigma(\textbf{x}))
+\end{align*}
+#+END_LATEX
+
+\newpage
+
+\[J_{neg-sample}(\bold{v_c}, o, U) = -log(\sigma(\bold{u_o}^T\bold{v_c})) - \sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c})) \]
+*(e)* Repeat parts *b* and *c*, computing partial derivatives of $J_{neg-sample}$ w.r.t. to $\bold{v_c}$, w.r.t. $\bold{u_o}$ and w.r.t. $\bold{u_k}$. Write your answer in terms of the vectors, $\bold{u_o}$, $\bold{v_c}$, and $\bold{u_k}$, where $k \in [1, K]$. After you've done this, describe why this function is much more efficient to compute than the naive-softmax loss.
+
+(1) *w.r.t $\bold{v_c}$: the embedded word vector of the center word.*
+#+BEGIN_LATEX
+\begin{align*}
+\frac{\partial J_{neg-sample}}{\partial \bold{v_c}} &= \frac{\partial}{\partial \bold{v_c}}[-log(\sigma(\bold{u_o}^T\bold{v_c})) - \sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
+&= \frac{\partial}{\partial \bold{v_c}}[-log(\sigma(\bold{u_o}^T \bold{v_c}))] - \frac{\partial}{\partial \bold{v_c}}[\sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
+\end{align*}
+#+END_LATEX
+Derivative of first term:
+Let $\beta = \sigma(\bold{u_o}^T\bold{v_c})$
+#+BEGIN_LATEX
+\begin{align*}
+&(\frac{\partial}{\partial \bold{v_c}}[-log(\beta)])
+(\frac{\partial}{\partial \bold{v_c}}[\beta]) \\
+&= (-\frac{1}{\sigma(\bold{u_o}^T\bold{v_c})})(\bold{u_o}\sigma(\bold{u_o}^T\bold{v_c})(1-\sigma(\bold{u_o}^T\bold{v_c}))) \\
+&= -\bold{u_o}(1-\sigma(\bold{u_o}^T\bold{v_c}))
+\end{align*}
+#+END_LATEX
+Derivative of second term:
+let $\beta = \sigma(-\bold{u_k}^T\bold{v_c})$
+#+BEGIN_LATEX
+\begin{align*}
+&\sum_{k=1}^{K} \frac{\partial}{\partial \bold{v_c}}[log(\beta)]
+\frac{\partial}{\partial \bold{v_c}}[\beta]\\
+&= \sum_{k=1}^K \frac{-\bold{u_k}\sigma(-\bold{u_k}^T\bold{v_c})(1-\sigma(-\bold{u_k}^T\bold{v_c}))}{\sigma(-\bold{u_k}^T\bold{v_c})}  \\
+&= - \sum_{k=1}^{K}\bold{u_k}(1-\sigma(-\bold{u_k}^T\bold{v_c}))
+\end{align*}
+#+END_LATEX
+
+Final: \[\frac{\partial J_{neg-sample}}{\partial \bold{v_c}} = -\bold{u_o}(1-\sigma(\bold{u_o}^T\bold{v_c})) + \sum_{k=1}^{K}\bold{u_k}(1-\sigma(-\bold{u_k}^T\bold{v_c})) \]
+
+\newpage
+
+(2) *w.r.t $\bold{u_o}$: the embedded word vector of the outside word.*
+#+BEGIN_LATEX
+\begin{align*}
+\frac{\partial J_{neg-sample}}{\partial \bold{u_o}} &= \frac{\partial}{\partial \bold{u_o}}[-log(\sigma(\bold{u_o}^T\bold{v_c})) - \sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
+&= \frac{\partial}{\partial \bold{u_o}}[-log(\sigma(\bold{u_o}^T \bold{v_c}))] - \frac{\partial}{\partial \bold{u_o}}[\sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
+&= \frac{\partial}{\partial \bold{u_o}}[-log(\sigma(\bold{u_o}^T \bold{v_c}))] - 0 \\
+&= -[\frac{1}{\sigma(\bold{u_o}^T\bold{v_c})}][\sigma(\bold{u_o}^T\bold{v_c})(1-\sigma(\bold{u_o}^T\bold{v_c}))\bold{v_c}] \\
+&= -\bold{v_c}(1-\sigma(\bold{u_o}^T\bold{v_c}))
+\end{align*}
+#+END_LATEX
+
+(3) *w.r.t $\bold{u_k}$: the embedded word vector of one of the $K$ negative samples.*
+
+#+BEGIN_LATEX
+
+\begin{align*}
+\frac{\partial J_{neg-sample}}{\partial \bold{u_k}} &= \frac{\partial}{\partial \bold{u_k}}[-log(\sigma(\bold{u_o}^T\bold{v_c})) - \sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
+&= \frac{\partial}{\partial \bold{u_k}}[-log(\sigma(\bold{u_o}^T \bold{v_c}))] - \frac{\partial}{\partial \bold{u_k}}[\sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
+&= 0 - \frac{\partial}{\partial \bold{u_k}}[\sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))]\\
+&= - \frac{-\bold{v_c}\sigma(-\bold{u_k}^T\bold{v_c})(1-\sigma(-\bold{u_k}^T\bold{v_c}))}{\sigma(-\bold{u_k}^T\bold{v_c})}  \\
+&= \bold{v_c}(1-\sigma(-\bold{u_k}^T\bold{v_c}))
+\end{align*}
+#+END_LATEX
+
+*Follow-up*: This loss function is much more efficient to compute than the naive-softmax loss because it takes into account just $K$ more sample word vectors ($O(K)$) whereas in the naive-softmax loss we must normalize the unnormalized probabilities, requiring that we look at all the word vectors in the entire vocabulary ($O(|V|)$).
+
+\newpage
+
+*(f)* Suppose the center word is $c = w_t$ and the context window is $[w_{t-m}, ..., w_{t-1}, w_t, w_{t+1}, ..., w_{t+m}]$, where $m$ is the context windows size. In the skip-gram version of word2vec, the total loss for the context window is:
+\[ J_{skip-gram}(\bold{v_c}, w_{t-m},...,w_{t+m}, \textbf{U}) = \sum_{-m \leq j \leq m, j \neq 0} J(\bold{v_c}, w_{t+j}, \textbf{U})\]
+Here, $J(\bold{v_c}, w_{t+j}, \textbf{U})$ represents an arbitrary loss term for the center word $c=w_t$ and outside word $w_{t+j}$. Write down three partials
+:
+*(i)* $\partial J_{skip-gram}(\bold{v_c}, w_{t-m},...,w_{t+m}, \textbf{U}) / \partial \textbf{U}$
+
+
+\[ \sum_{-m \leq j \leq m, j \neq 0} \partial J_{skip-gram}(\bold{v_c}, w_{t+j}, \textbf{U}) / \partial \textbf{U}  \]
+
+
+*(ii)* $\partial J_{skip-gram}(\bold{v_c}, w_{t-m},...,w_{t+m}, \textbf{U}) / \partial \textbf{v}_c$
+
+\[ \sum_{-m \leq j \leq m, j \neq 0} \partial J_{skip-gram}(\bold{v_c}, w_{t+j}, \textbf{U}) / \partial \bold{\bold{v_c}}  \]
+
+*(iii)* $\partial J_{skip-gram}(\bold{v_c}, w_{t-m},...,w_{t+m}, \textbf{U}) / \partial \textbf{v}_w$ when $w \neq c$
+$$\bold{0}$$
+
+\newpage
+
+*Code Results*
+
+#+CAPTION: The learned word vectors in 2D space.
+[[./code/word_vectors.png]]
