@@ -99,14 +99,14 @@ e^{u_{w\neq o}^T\bold{v_c}} \cdot \bold{v_c}) \\
 \[J_{neg-sample}(\bold{v_c}, o, U) = -log(\sigma(\bold{u_o}^T\bold{v_c})) - \sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c})) \]
 *(e)* Repeat parts *b* and *c*, computing partial derivatives of $J_{neg-sample}$ w.r.t. to $\bold{v_c}$, w.r.t. $\bold{u_o}$ and w.r.t. $\bold{u_k}$. Write your answer in terms of the vectors, $\bold{u_o}$, $\bold{v_c}$, and $\bold{u_k}$, where $k \in [1, K]$. After you've done this, describe why this function is much more efficient to compute than the naive-softmax loss.
 
-(1) *w.r.t $\bold{v_c}$: the embedded word vector of the center word.*
+(1) *w.r.t $\bold{v_c}$: The embedded word vector of the center word.*
 #+BEGIN_LATEX
 \begin{align*}
 \frac{\partial J_{neg-sample}}{\partial \bold{v_c}} &= \frac{\partial}{\partial \bold{v_c}}[-log(\sigma(\bold{u_o}^T\bold{v_c})) - \sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
 &= \frac{\partial}{\partial \bold{v_c}}[-log(\sigma(\bold{u_o}^T \bold{v_c}))] - \frac{\partial}{\partial \bold{v_c}}[\sum_{k=1}^K log(\sigma(-\bold{u_k}^T\bold{v_c}))] \\
 \end{align*}
 #+END_LATEX
-Derivative of first term:
+Derivative of first term - the log of the probability that the center word and true outside word came from the corpus data:
 Let $\beta = \sigma(\bold{u_o}^T\bold{v_c})$
 #+BEGIN_LATEX
 \begin{align*}
@@ -116,7 +116,7 @@ Let $\beta = \sigma(\bold{u_o}^T\bold{v_c})$
 &= -\bold{u_o}(1-\sigma(\bold{u_o}^T\bold{v_c}))
 \end{align*}
 #+END_LATEX
-Derivative of second term:
+Derivative of second term -- the sum of logs of the probabilities that the center word and outside context words did not come from the corpus data.:
 let $\beta = \sigma(-\bold{u_k}^T\bold{v_c})$
 #+BEGIN_LATEX
 \begin{align*}
