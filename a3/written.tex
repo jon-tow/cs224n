@@ -1,0 +1,215 @@
+% Created 2019-08-10 Sat 22:31
+% Intended LaTeX compiler: pdflatex
+\documentclass[10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jonathan Tow}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={Jonathan Tow},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.2 (Org mode 9.1.9)}, 
+ pdflang={English}}
+\begin{document}
+
+\textbf{Assignment 3 - Written}: Machine Learning \& Neural Networks
+
+
+\section*{1. Machine Learning \& Neural Networks}
+\label{sec:org73a526c}
+
+\textbf{(a)} Adam Optimizer.
+
+(i) Adam optimization uses a trick called \emph{momentum} by keeping track of \textbf{m}, a rolling average of the gradients:
+
+\begin{LATEX}
+\begin{align*}
+\bold{m} &\leftarrow \beta_1 \bold{m} + (1-\beta_1) \nabla_{\theta} J_{minibatch}(\theta) \\
+\theta &\leftarrow \theta - \alpha\bold{m}
+\end{align*}
+\end{LATEX}
+
+where \(\beta_1\) is a hyperparameter between 0 and 1. Briefly explain how using \textbf{m} stops the update from varying 
+as much and why this low variance may be helpful to learning, overall.\\
+
+
+\textbf{Solution}: By keeping track of a rolling average of the loss function's gradients 
+??????????????????????????????????????????????????????????????????????????????????
+Dampening the oscillations is helpful because it straightens out the trail that descends into the minimum. 
+Informally, the efficiency of optimization increases when update steps zig-zag (vary) less.
+
+(ii) Adam also uses \emph{adaptive learning rates} by keeping track of \(\bold{v}\), a rolling average of the magnitudes of the gradients:
+
+\begin{LATEX}
+\begin{align*}
+\bold{m} &\leftarrow \beta_1 \bold{m} + (1-\beta_1) \nabla_{\theta} J_{minibatch}(\theta) \\
+\bold{v} &\leftarrow \beta_2 \bold{v} + (1-\beta_2) (\nabla_{\theta} J_{minibatch}(\theta) \odot \nabla_{\theta} J_{minibatch}(\theta))\\
+\theta &\leftarrow \theta - \alpha \odot \bold{m} / \sqrt{\bold{v}}
+\end{align*}
+\end{LATEX}
+
+Since Adam divides the update by \(\sqrt{\bold{v}}\) which of the model parameters will get larger updates? Why might this help 
+learning?
+
+\textbf{Solution:}
+
+//
+
+\textbf{(b)} Dropout is a regularization technique. During training, dropout randomly sets units in the hidden layer \(\bold{h}\) to
+ zero with probability \(p_{drop}\) (dropping different units in each minibatch), and then multiplies \(\bold{h}\) by a constant
+ \(\gamma\). We can write this as:
+
+\[\bold{h}_{drop} = \gamma \bold{d} \circ \bold{h}\]
+
+where \(\bold{d} \in {0, 1}^{D_k}\) is a mask vector.
+
+(i) What must \(\gamma\) equal in terms of \(p_{drop}\)?\\
+
+\textbf{Solution:}
+??????????????????????????????????????????????????????????????????????????????????
+Note that dropout treats each unit as a random variable so that the binary mask \(d\) follows a Bernoulli distribution
+with distribution: \(p(X=1) = 1 - p_{drop}\) and \(p(X=0) = p_{drop}\). \(\gamma\) must be chosen such that the expected value
+of \(\bold{h}_{drop}\) is \(\bold{h}\). 
+
+(ii) Why should we apply dropout during training but not during evaluation?\\
+
+\textbf{Solution:}
+The goal of dropout is to reduce overfitting. We're interested in updating unit weights so as to form a network that
+performs well across different datasets. Now, during evaluation we're concerned with how well the model handles unseen
+data. When we dropout units, we're "thinning" out the network which in many cases will add noise to predictions and 
+dampen accuracy. Thus, if we were to apply dropout during evaluation time, we would not be able to fairly assess the
+generalization power of the network.
+
+\newpage
+
+\section*{2. Neural Transition-Based Dependency Parsing}
+\label{sec:org083d954}
+
+\textbf{(a)} \textbf{Transition-Based Parse}: A parser which incrementally builds up a parse one step at a time. At every step it 
+maintains a \emph{partial parse} which is represented as:
+
+\begin{itemize}
+\item A \emph{stack} of words that are currently being processed.
+\item A \emph{buffer} of words yet to be processed.
+\item A list of \emph{dependencies} predicted by the parser.
+\end{itemize}
+
+Initially the stack contains ROOT, the dependencies list is empty, and the buffer contains all words of the sentence 
+in order. At each step the parser applies a \emph{transition} to the partial parse until its buffer is empty and the stack 
+size is 1. The following transitions can be applied:
+
+\begin{itemize}
+\item \emph{SHIFT}: removes the first word from the buffer and pushes it onto the stack.
+\item \emph{LEFT-ARC}: marks the second (second most recently added) item on the stack as a dependent of the first item and 
+removes the second item from the stack.
+\item \emph{RIGHT-ARC}: marks the first (most recently added) item on the stack as a dependent of the second item and removes
+the first item from the stack.\\
+\end{itemize}
+
+\textbf{Solution}:
+
+\begin{longtable}{|l|l|l|l|}
+Stack & Buffer & New Dependency & Transition\\
+\hline
+\endfirsthead
+\multicolumn{4}{l}{Continued from previous page} \\
+\hline
+
+Stack & Buffer & New Dependency & Transition \\
+
+\hline
+\endhead
+\hline\multicolumn{4}{r}{Continued on next page} \\
+\endfoot
+\endlastfoot
+\hline
+(ROOT) & [I, parsed, this, sentence, correctly] &  & Initial Config\\
+(ROOT, I) & [parsed, this, sentence, correctly] &  & SHIFT\\
+(ROOT, I, parsed) & [this, sentence, correctly] &  & SHIFT\\
+(ROOT, parsed) & [this, sentence, correctly] & parsed->I & LEFT-ARC\\
+(ROOT, parsed, this) & [sentence, correctly] &  & SHIFT\\
+(ROOT, parsed, this, sentence) & [correctly] &  & SHIFT\\
+(ROOT, parsed, sentence) & [correctly] & sentence->this & LEFT-ARC\\
+(ROOT, parsed) & [correctly] & parsed->sentence & RIGHT-ARC\\
+(ROOT, parsed, correctly) & [] &  & SHIFT\\
+(ROOT, parsed) & [] & parsed->correctly & RIGHT-ARC\\
+(ROOT) & [] & root->parsed & RIGHT-ARC\\
+\end{longtable}
+
+\textbf{(b)} How many steps will it take to parse \(n\) words (in terms of \(n\))?
+
+\textbf{Solution}: In the worst case, parsing will take linear time, i.e. \(O(n)\). At any step of parsing, we have two possible
+state transitions, either shifting a word from the buffer to the stack or clearing a dependent from the stack. Every 
+word must spend a single step being shifted from the buffer, thus \(n\) words cost \(n\) shift steps. From the stack a 
+word must be "arc"-ed over as a dependent exactly once, thus \(n\) words cost \(n\) "arc"-ing steps. Therefore, we have 
+\(2*n\) steps giving a cost of \(O(n)\).
+
+
+\textbf{(e)} Report of best UAS model:
+
+\begin{longtable}{|c|c|}
+dev UAS & test UAS\\
+\hline
+\endfirsthead
+\multicolumn{2}{l}{Continued from previous page} \\
+\hline
+
+dev UAS & test UAS \\
+
+\hline
+\endhead
+\hline\multicolumn{2}{r}{Continued on next page} \\
+\endfoot
+\endlastfoot
+\hline
+89.60 & 89.74\\
+\end{longtable}
+
+\textbf{(f)} For each sentence state the type of error, the incorrect dependency, and the correct dependency:\\
+
+(i)\\
+
+\begin{itemize}
+\item \textbf{Error Type}:
+\item \textbf{Incorrect Dependency}:
+\item \textbf{Correct Dependency}:
+\end{itemize}
+
+(ii)\\
+
+\begin{itemize}
+\item \textbf{Error Type}:
+\item \textbf{Incorrect Dependency}:
+\item \textbf{Correct Dependency}:
+\end{itemize}
+
+(iii)\\
+
+\begin{itemize}
+\item \textbf{Error Type}:
+\item \textbf{Incorrect Dependency}:
+\item \textbf{Correct Dependency}:
+\end{itemize}
+
+(iv)\\
+
+\begin{itemize}
+\item \textbf{Error Type}:
+\item \textbf{Incorrect Dependency}:
+\item \textbf{Correct Dependency}:
+\end{itemize}
+\end{document}
