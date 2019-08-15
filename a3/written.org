@@ -26,7 +26,7 @@ smooth transitions, i.e. lower variance, from one state to the next when we plac
 $\bold{m}_{i-1}$ so that recent changes have a bit more importance than the newly retrieved gradient at position $\theta$. Note that when we don't
 care about  the past, $\beta_1 = 0$, we get back simple SGD.
 This dampening of oscillations is helpful because it straightens out the trail that descends into the minimum. 
-Informally, the efficiency of optimization increases when update steps zig-zag (vary) less.
+Informally, the efficiency of optimization increases when update steps zig-zag (vary) less.\\
 
 (ii) Adam also uses /adaptive learning rates/ by keeping track of $\bold{v}$, a rolling average of the magnitudes of the gradients:
 
@@ -39,11 +39,14 @@ Informally, the efficiency of optimization increases when update steps zig-zag (
 #+END_LATEX
 
 Since Adam divides the update by $\sqrt{\bold{v}}$ which of the model parameters will get larger updates? Why might this help 
-learning?
+learning?\\
 
-*Solution:*
+*Solution:* Because $\bold{v}$ is a rolling average of the magnitudes of gradients, parameters of the model 
+with corresponding small gradients, i.e. small $\bold{v}$ entries, will get larger updates (division by a smaller magnitude). 
+This might be helpful because it can get recent stagnant parameters moving more efficient along their axes 
+and in turn expedite convergence.
 
-//
+\\
 
 *(b)* Dropout is a regularization technique. During training, dropout randomly sets units in the hidden layer $\bold{h}$ to
  zero with probability $p_{drop}$ (dropping different units in each minibatch), and then multiplies $\bold{h}$ by a constant
