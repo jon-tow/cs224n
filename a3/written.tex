@@ -1,4 +1,4 @@
-% Created 2019-08-10 Sat 22:31
+% Created 2019-08-20 Tue 16:50
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -30,7 +30,7 @@
 
 
 \section*{1. Machine Learning \& Neural Networks}
-\label{sec:org73a526c}
+\label{sec:org864511c}
 
 \textbf{(a)} Adam Optimizer.
 
@@ -38,8 +38,8 @@
 
 \begin{LATEX}
 \begin{align*}
-\bold{m} &\leftarrow \beta_1 \bold{m} + (1-\beta_1) \nabla_{\theta} J_{minibatch}(\theta) \\
-\theta &\leftarrow \theta - \alpha\bold{m}
+\bold{m_{i}} &\leftarrow \beta_1 \bold{m_{i-1}} + (1-\beta_1) \nabla_{\theta} J_{minibatch}(\theta) \\
+\theta &\leftarrow \theta - \alpha\bold{m_i}
 \end{align*}
 \end{LATEX}
 
@@ -47,10 +47,13 @@ where \(\beta_1\) is a hyperparameter between 0 and 1. Briefly explain how using
 as much and why this low variance may be helpful to learning, overall.\\
 
 
-\textbf{Solution}: By keeping track of a rolling average of the loss function's gradients 
-??????????????????????????????????????????????????????????????????????????????????
-Dampening the oscillations is helpful because it straightens out the trail that descends into the minimum. 
-Informally, the efficiency of optimization increases when update steps zig-zag (vary) less.
+\textbf{Solution}: By maintaining a sort of exponential smoothing, or rolling average, of the loss function's gradients, we effectively control 
+a "memory bank" that tracks previous update steps and fuses them together to some degree, \(\beta_1\), with new gradient information. This can
+smooth transitions, i.e. lower variance, from one state to the next when we place the right amount of \(\beta_1\) on the previous state
+\(\bold{m}_{i-1}\) so that recent changes have a bit more importance than the newly retrieved gradient at position \(\theta\). Note that when we don't
+care about  the past, \(\beta_1 = 0\), we get back simple SGD.
+This dampening of oscillations is helpful because it straightens out the trail that descends into the minimum. 
+Informally, the efficiency of optimization increases when update steps zig-zag (vary) less.\\
 
 (ii) Adam also uses \emph{adaptive learning rates} by keeping track of \(\bold{v}\), a rolling average of the magnitudes of the gradients:
 
@@ -63,11 +66,14 @@ Informally, the efficiency of optimization increases when update steps zig-zag (
 \end{LATEX}
 
 Since Adam divides the update by \(\sqrt{\bold{v}}\) which of the model parameters will get larger updates? Why might this help 
-learning?
+learning?\\
 
-\textbf{Solution:}
-
-//
+\textbf{Solution:} Because \(\bold{v}\) is a rolling average of the magnitudes of gradients, parameters of the model 
+with corresponding small gradients, i.e. small \(\bold{v}\) entries, will get larger updates. We're cutting out
+a smaller amount from such parameters during an update because we divide them by their small gradient 
+magnitude/norm. 
+This might be helpful because it can get recent stagnant parameters moving more efficiently along their axes 
+and in turn expedite convergence.\\
 
 \textbf{(b)} Dropout is a regularization technique. During training, dropout randomly sets units in the hidden layer \(\bold{h}\) to
  zero with probability \(p_{drop}\) (dropping different units in each minibatch), and then multiplies \(\bold{h}\) by a constant
@@ -75,15 +81,15 @@ learning?
 
 \[\bold{h}_{drop} = \gamma \bold{d} \circ \bold{h}\]
 
-where \(\bold{d} \in {0, 1}^{D_k}\) is a mask vector.
+where \(\bold{d} \in \{0, 1\}^{D_k}\) is a mask vector.\\
 
 (i) What must \(\gamma\) equal in terms of \(p_{drop}\)?\\
 
 \textbf{Solution:}
-??????????????????????????????????????????????????????????????????????????????????
-Note that dropout treats each unit as a random variable so that the binary mask \(d\) follows a Bernoulli distribution
-with distribution: \(p(X=1) = 1 - p_{drop}\) and \(p(X=0) = p_{drop}\). \(\gamma\) must be chosen such that the expected value
-of \(\bold{h}_{drop}\) is \(\bold{h}\). 
+During training we drop units at a rate of \(p_{drop}\), resulting in roughly \(p_{keep} = 1 - p_{drop}\) fraction of
+units left over. At test time we'd like to have the effect of keeping a similar fraction,   '\(p_{keep}\), of 
+units on. By scaling down the layer units by \(\gamma = \frac{1}{1-p_{drop}} = \frac{1}{p_{keep}}\), we effectively level out their magnitudes so that
+both phases of learning share very similar expected outputs.\\
 
 (ii) Why should we apply dropout during training but not during evaluation?\\
 
@@ -97,7 +103,7 @@ generalization power of the network.
 \newpage
 
 \section*{2. Neural Transition-Based Dependency Parsing}
-\label{sec:org083d954}
+\label{sec:orgf1df58f}
 
 \textbf{(a)} \textbf{Transition-Based Parse}: A parser which incrementally builds up a parse one step at a time. At every step it 
 maintains a \emph{partial parse} which is represented as:

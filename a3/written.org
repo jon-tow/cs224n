@@ -42,11 +42,11 @@ Since Adam divides the update by $\sqrt{\bold{v}}$ which of the model parameters
 learning?\\
 
 *Solution:* Because $\bold{v}$ is a rolling average of the magnitudes of gradients, parameters of the model 
-with corresponding small gradients, i.e. small $\bold{v}$ entries, will get larger updates (division by a smaller magnitude). 
-This might be helpful because it can get recent stagnant parameters moving more efficient along their axes 
-and in turn expedite convergence.
-
-\\
+with corresponding small gradients, i.e. small $\bold{v}$ entries, will get larger updates. We're cutting out
+a smaller amount from such parameters during an update because we divide them by their small gradient 
+magnitude/norm. 
+This might be helpful because it can get recent stagnant parameters moving more efficiently along their axes 
+and in turn expedite convergence.\\
 
 *(b)* Dropout is a regularization technique. During training, dropout randomly sets units in the hidden layer $\bold{h}$ to
  zero with probability $p_{drop}$ (dropping different units in each minibatch), and then multiplies $\bold{h}$ by a constant
@@ -54,15 +54,15 @@ and in turn expedite convergence.
 
 \[\bold{h}_{drop} = \gamma \bold{d} \circ \bold{h}\]
 
-where $\bold{d} \in {0, 1}^{D_k}$ is a mask vector.
+where $\bold{d} \in \{0, 1\}^{D_k}$ is a mask vector.\\
 
 (i) What must $\gamma$ equal in terms of $p_{drop}$?\\
 
 *Solution:*
-??????????????????????????????????????????????????????????????????????????????????
-Note that dropout treats each unit as a random variable so that the binary mask $d$ follows a Bernoulli distribution
-with distribution: $p(X=1) = 1 - p_{drop}$ and $p(X=0) = p_{drop}$. $\gamma$ must be chosen such that the expected value
-of $\bold{h}_{drop}$ is $\bold{h}$. 
+During training we drop units at a rate of $p_{drop}$, resulting in roughly $p_{keep} = 1 - p_{drop}$ fraction of
+units left over. At test time we'd like to have the effect of keeping a similar fraction,   '$p_{keep}$, of 
+units on. By scaling down the layer units by $\gamma = \frac{1}{1-p_{drop}} = \frac{1}{p_{keep}}$, we effectively level out their magnitudes so that
+both phases of learning share very similar expected outputs.\\
 
 (ii) Why should we apply dropout during training but not during evaluation?\\
 
