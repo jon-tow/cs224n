@@ -203,6 +203,7 @@ class NMT(nn.Module):
         init_decoder_cell = self.c_projection(c_enc_cat)  # [b, h]
         # Final hidden and cell states to pass to the decoder.
         dec_init_state = (init_decoder_hidden, init_decoder_cell)
+
         # END YOUR CODE
 
         return enc_hiddens, dec_init_state
