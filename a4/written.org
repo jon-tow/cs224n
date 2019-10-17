@@ -47,9 +47,10 @@ where {$v, W, W_1, W_2$} are trainable parameters.\\
 @@latex:\noindent@@
 *Solution:\\*
 1. _Dot Product_
- - *Advantage*: Efficient to compute and easy to interpret state similarities. Any source
-   hidden state vector that is orthogonal-ish to the target hidden vector will be
-   "washed away". The efficiency can be seen as advantage over the additive mechanism.
+ - *Advantage*: Efficient to compute, memory efficient, and easy to interpret
+   state similarities. Any source hidden state vector that is orthogonal-ish to
+   the target hidden vector will be "washed away". The efficiency can be seen as
+   advantage over the additive mechanism.
  - *Disadvantage*: Rigid. Little flexibility compared to the other two.
 
 2. _Multiplicative_
@@ -61,7 +62,7 @@ where {$v, W, W_1, W_2$} are trainable parameters.\\
 
 3. _Additive_
  - *Advantage*: Both the target hidden vector and source hidden vector states get
-   their own learnable transformation in $W_1$ and $W_2$, respectively. This
+   their own learned transformation in $W_1$ and $W_2$, respectively. This
    makes for more flexibility in the scoring.
  - *Disadvantage*: Slower to compute than the other two mechanisms.
 
