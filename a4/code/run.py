@@ -78,7 +78,8 @@ def evaluate_ppl(model, dev_data, batch_size=32):
             loss = -model(src_sents, tgt_sents).sum()
 
             cum_loss += loss.item()
-            tgt_word_num_to_predict = sum(len(s[1:]) for s in tgt_sents)  # omitting leading `<s>`
+            tgt_word_num_to_predict = sum(
+                len(s[1:]) for s in tgt_sents)  # omitting leading `<s>`
             cum_tgt_words += tgt_word_num_to_predict
 
         ppl = np.exp(cum_loss / cum_tgt_words)
@@ -322,7 +323,7 @@ def main():
     args = docopt(__doc__)
 
     # Check pytorch version
-    assert(torch.__version__ == "1.0.0"), "Please update your installation of PyTorch. You have {} and you should have version 1.0.0".format(torch.__version__)
+#    assert(torch.__version__ == "1.0.0"), "Please update your installation of PyTorch. You have {} and you should have version 1.0.0".format(torch.__version__)
 
     # seed the random number generators
     seed = int(args['--seed'])

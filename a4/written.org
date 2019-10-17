@@ -1,0 +1,68 @@
+#+latex_class_options: [10pt]
+
+*Assignment 4 - Written*:
+
+* 1. Neural Machine Translation with RNNs
+
+\\
+*(g)* The /generate_sent_masks()/ function in nmt_model.py produces a tensor called
+/enc_masks/. It has the shape (batch size, max source sentence length) and contains
+1s in positions corresponding to 'pad' tokens in the input, and 0s for non-padded
+tokens. Look at how the masks are used during the attention computation in the
+`step()` function.
+Explain in ~three sentences what effect the masks have on the entire attention
+computation. Then explain in one or two sentences why it is necessary to use the
+masks in this way.\\
+
+@@latex:\noindent@@
+*Solution:*
+The mask is placed over the attention scores, $e_t$, and for each individual score
+masked by a $1$, i.e. a boolean /true/, we fill it with $-\infty$ (the smallest possible
+float). So, in essence, we're saying, for these entries marked as 'pad' tokens,
+pay them NO mind at all! These tokens get negligible probability weight in the
+attention distribution and it's corresponding hidden encoded state will be faded
+away in the attention output.
+
+Now, if we didn't use the masks in this way, padding tokens would somewhat
+dampen the attention distribution.\\
+
+@@latex:\noindent@@
+*(i)* Please report the model's corpus BLEU Score.
+
+#+CAPTION: The model's corpus BLEU Score is roughly 22.64
+#+NAME:   fig:BLEU Scores
+[[./img/bleu_score.png]]
+
+\newpage
+
+@@latex:\noindent@@
+*(j)* Provide one possible advantage and disadvantage of each attention, mechanism
+with respect to either of the other two attention mechanisms.
+As a reminder:
+- Dot Product Attention: $e_{t,i} = s^T_{t}h_{i}$
+- Multiplicative Attention: $e_{t,i} = s^T_{t}Wh_{i}$
+- Additive Attention: $e_{t, i} = v^T(W_1h_i + W_2s_t)$
+where {$v, W, W_1, W_2$} are trainable parameters.\\
+
+@@latex:\noindent@@
+*Solution:\\*
+1. _Dot Product_
+ - *Advantage*: Efficient to compute and easy to interpret state similarities. Any source
+   hidden state vector that is orthogonal-ish to the target hidden vector will be
+   "washed away". The efficiency can be seen as advantage over the additive mechanism.
+ - *Disadvantage*: Rigid. Little flexibility compared to the other two.
+
+2. _Multiplicative_
+ - *Advantage*: Efficient to compute. The learnable parameter matrix, $W$, allows
+   us to transform the source's hidden state vectors in a way that reflects
+   lower loss in the task (depending on how well training goes). This flexible linear
+   transformation can be seen as advantage over the /dot product/ mechanism.
+ - *Disadvantage*: Still not as flexible as additive attention.
+
+3. _Additive_
+ - *Advantage*: Both the target hidden vector and source hidden vector states get
+   their own learnable transformation in $W_1$ and $W_2$, respectively. This
+   makes for more flexibility in the scoring.
+ - *Disadvantage*: Slower to compute than the other two mechanisms.
+
+* 2. Analyzing NMT Systems
