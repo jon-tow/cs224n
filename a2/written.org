@@ -14,14 +14,14 @@ Definitions:
 \[\hat{y}_o = p(\bold{u_o} | \bold{v_c}) = \frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in \text{Vocab}}e^{\bold{u_w}^T\bold{v_c}}}\]
 
 \newpage
-*(a)* Show that naive-softmax loss is the same as the cross-entropy loss between $y$ and $\hat{y}$, i.e. show that: 
+*(a)* Show that naive-softmax loss is the same as the cross-entropy loss between $y$ and $\hat{y}$, i.e. show that:
 
 $$-\sum_{w \in Vocab} y_w log(\hat{y}_w) = -log(\hat{y}_{o})$$
 
 *Solution*: B/c $y$ is a one-hot encoded vector with zeros everywhere except at the index $w = o$ where $y_o=1$, the sum on the LHS breaks down as follows:
 
 \[
--\sum_{w \in Vocab} y_w log(\hat{y}_w) 
+-\sum_{w \in Vocab} y_w log(\hat{y}_w)
 = -(y_1log(\hat{y}_1) + ... + y_olog(\hat{y}_o) + ... + y_{|V|}log(\hat{y}_{|V|}))
 = -log(\hat{y}_o)
 \]
@@ -31,7 +31,7 @@ $$-\sum_{w \in Vocab} y_w log(\hat{y}_w) = -log(\hat{y}_{o})$$
 *Solution*:
 #+BEGIN_LATEX
 \begin{align*}
-\frac{\partial J_{Naive-Softmax}}{\partial \bold{v_c}} 
+\frac{\partial J_{Naive-Softmax}}{\partial \bold{v_c}}
 &= \frac{\partial}{\partial \bold{v_c}} [-log(\hat{y}_o)] \\
 &= \frac{\partial}{\partial \bold{v_c}} [-log(\frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}})] \\
 &= -\frac{\partial}{\partial \bold{v_c}} [log(e^{\bold{u_o}^T\bold{v_c}})- log(\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}})] \\
@@ -52,7 +52,7 @@ This says that the slope of the loss function w.r.t. the center word is equal to
 *case 1 - the outside word vector is the true context word vector:*
 #+BEGIN_LATEX
 \begin{align*}
-\frac{\partial J_{naive-softmax}}{\partial u_{w=o}} 
+\frac{\partial J_{naive-softmax}}{\partial u_{w=o}}
 &= \frac{\partial}{\partial u_{w=o}} [-log(\hat{y}_o)] \\
 &= \frac{\partial}{\partial u_{w=o}} [-log(\frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}})] \\
 &= -\frac{\partial}{\partial u_{w=o}}[\bold{u_o}^T\bold{v_c}] + \frac{\partial}{\partial u_{w=o}}[log(\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}})] \\
@@ -64,11 +64,11 @@ This says that the slope of the loss function w.r.t. the center word is equal to
 *case 2 - the outside word vector is any context word but the true one:*
 #+BEGIN_LATEX
 \begin{align*}
-\frac{\partial J_{naive-softmax}}{\partial \bold{u_{w \neq o}}} 
+\frac{\partial J_{naive-softmax}}{\partial \bold{u_{w \neq o}}}
 &= \frac{\partial}{\partial \bold{u_{w \neq o}}} [-log(\hat{y}_o)] \\
 &= \frac{\partial}{\partial \bold{u_{w \neq o}}} [-log(\frac{e^{\bold{u_o}^T\bold{v_c}}}{\sum_{w \in Vocab}e^{\bold{u_w}^T\bold{v_c}}})] \\
 &= -\frac{\partial}{\partial \bold{u_{w \neq o}}}[\bold{u_o}^T\bold{v_c}] + \frac{\partial}{\partial \bold{u_{w \neq o}}}[log(\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}})] \\
-&= 0 + (\frac{1}{\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}}} \cdot 
+&= 0 + (\frac{1}{\sum_{w \in Vocab}e^{\bold{u_w}^T \bold{v_c}}} \cdot
 e^{u_{w\neq o}^T\bold{v_c}} \cdot \bold{v_c}) \\
 &= \bold{v_c} \cdot \hat{y}_{w \neq o}
 \end{align*}
@@ -78,14 +78,14 @@ e^{u_{w\neq o}^T\bold{v_c}} \cdot \bold{v_c}) \\
 
 (*d)* Compute the derivative of the sigmoid $\sigma(\textbf{x}) = \frac{1}{1 + e^{-\textbf{x}}} = \frac{e^{\textbf{x}}}{e^{\textbf{x}} + 1}$ w.r.t. $\textbf{x}$, where $\textbf{x}$ is a vector.
 
-*Solution:* 
+*Solution:*
 
 #+BEGIN_LATEX
 \begin{align*}
 \frac{d\sigma}{d\textbf{x}}
 &= \frac{d}{d\textbf{x}} [\frac{1}{1 + e^{-\textbf{x}}}] \\
 &= \frac{d}{d\textbf{x}} [(1 + e^{-\textbf{x}})^{-1}] \\
-&= [-(1 + e^{-\textbf{x}})^{-2}] [-e^{-\textbf{x}}] \\ 
+&= [-(1 + e^{-\textbf{x}})^{-2}] [-e^{-\textbf{x}}] \\
 &= \frac{e^{-\textbf{x}}}{(1 + e^{-\textbf{x}})^{2}} \\
 &= (\frac{1}{1 + e^{-\textbf{x}}}) (\frac{e^{-\textbf{x}}}{1 + e^{-\textbf{x}}})\\
 &= (\frac{1}{1 + e^{-\textbf{x}}}) (\frac{e^{-\textbf{x}} + 1 - 1}{1 + e^{-\textbf{x}}}) \\
@@ -182,3 +182,5 @@ $$\bold{0}$$
 
 #+CAPTION: The learned word vectors in 2D space.
 [[./code/word_vectors.png]]
+
+These are the word vectors assembled when minimizing the loss function of our skip-gram prediction model via SGD.
