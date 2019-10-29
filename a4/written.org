@@ -1,8 +1,11 @@
 #+latex_class_options: [10pt]
+#+LATEX_HEADER: \usepackage[margin=1.25in]{geometry}
 
-*Assignment 4 - Written*:
 
-* 1. Neural Machine Translation with RNNs
+*Assignment 4 - Written:* Neural Machine Translation
+\\
+
+** 1. Neural Machine Translation with RNNs
 
 \\
 *(g)* The /generate_sent_masks()/ function in nmt_model.py produces a tensor called
@@ -66,4 +69,134 @@ where {$v, W, W_1, W_2$} are trainable parameters.\\
    makes for more flexibility in the scoring.
  - *Disadvantage*: Slower to compute than the other two mechanisms.
 
-* 2. Analyzing NMT Systems
+\newpage
+
+** 2. Analyzing NMT Systems
+
+\\
+*(a)* For each example of a Spanish source sentence, reference
+(i.e., ‘gold’) English translation, and NMT (i.e., ‘model’) English translation, please:
+1. Identify the error in the NMT translation.
+2. Provide a reason why the model may have made the error (either due to a specific linguistic construct or specific model limitations).
+3. Describe one possible way we might alter the NMT system to fix the observed error
+
+@@latex: \noindent@@
+*Solution*:\\
+
+/i./
+1. *Error:* "...otro de mis favoritos" $\rightarrow$ "...another favorite of my favorites"
+2. *Reason:* ...?
+3. *Fix:* ...?
+
+/ii./
+1. *Error:* "...probablemente soy el autor para ninos, mas leido" $\rightarrow$ "...I'm probably the author for children, more reading"
+2. *Reason:* The model is unable to recognize the various kinds of word orderings in Spanish. Here we have the adjective /mas leido/ (most widely read) come *after* the noun it modifies, /autor para ninos/ (children's author). The model translates this word for word and outputs the error without taking into account the word ordering. In this case it'd be proper English to write the adjective before the noun as given in the reference translation.
+3. *Fix:* Try using multiple RNN/LSTM layers or reversing the input words to reduce error rate.
+
+/iii./
+1. *Error:* "...Richard Bolingbroke" $\rightarrow$ "...Richard <UNK>"
+2. *Reason:* The name /Bolingbroke/ was not able to be produced (because not in vocabulary).
+3. *Fix:* Either add the name to the vocabulary, learn to "copy" from source text (Gulcehre et al), or switch to character-based embeddings as input.
+\\
+\break
+
+/iv/.
+1. *Error:* "...dar vuelta a la manzana" $\rightarrow$ "...have to go back to the apple"
+2. *Reason:* The model is unable to take Spanish idioms and produce a translation with the correct semantics in English (we just get literal translations).
+3. *Fix:* Train on a well labeled dataset with idiom phrases.
+\\
+
+/v./
+1. *Error:* "...bano de la sala de profesores" $\rightarrow$ "...bathroom in the women's room"
+2. *Reason:* Female context suggests women? Gender-bias with /professor/ translation?
+3. *Fix:* Feed more data?
+
+/vi./
+1. *Error:* "100,000 hectareas" $\rightarrow$ "100,000 acres"
+2. *Reason:* The model does not understand unit conversions from metric system (/hectare/) to English based (US & Imperial) systems (/acre/).
+3. *Fix:* Not sure... Teach the model conversions!?
+
+\newpage
+
+@@latex:\noindent@@
+*(b)* Now it is time to explore the outputs of the model that you have trained! The test-set
+translations your model produced in question 1-i should be located in outputs/test outputs.txt.
+Please identify 2 examples of errors that your model produced.2 The two examples you find should
+be different error types from one another and different error types than the examples provided in
+the previous question. \\
+
+@@latex: \noindent@@
+*Solution:*
+
+/i./
+1. *English-Source*: "*We have this bucket list*,  we have these things we want to do in life,  and I thought about all the people I wanted to reach out to that I didn't,  all the fences I wanted to mend,  all the experiences I wanted to have and I never did."
+
+2. *Spanish-Source*: "*Tenemos esta lista de cosas para hacer antes de morir*, estas cosas que queremos hacer en vida, y pens en toda la gente a las que quera llegar y no lo hice, todas las cercas que quera reparar, todas las experiencias que he querido tener y nunca tuve."
+
+3. *Model-Translation*: "*We have this list of things to do before they die*, these things that we want to do in life, and I thought about all the people I wanted to get and I did all the fences that I wanted to <unk> all the experiences I've wanted to have and never <unk>"
+
+4. *Error*: "Tenemos esta lista de cosas para hacer antes de morir" $\rightarrow$ "We have this list of things to do before they die"
+
+5. *Reason*: The model is unable to take Spanish sentences and map them to corresponding idioms in English, when possible. Here "bucket list" is the common English idiom for a list of things to do before death. The model can't deduce this from the given source. Note this is different from problem *(a) iv* in that we want a translation from /phrase/ $\rightarrow$ /idiom/, instead of /idiom/ $\rightarrow$ /phrase/.
+
+6. *Fix*: If the model can work with the right context window size and we train it on well labeled data having Spanish phrases mapped to common English idioms, things should work better.
+
+
+/ii./
+
+1. *English-Source*: "Pink is my favorite color."
+
+2. *Spanish-Source*: "El rosa es mi color favorito."
+
+3. *Model-Translation*: "The rose is my favorite color."
+
+4. *Error*: "El rosa..." $\rightarrow$ "The rose"
+
+5. *Reason*: The model has trouble distinguishing between a word with semantic differences depending on the specified gender of a noun. Here /el rosa/ is masculine which suggests *pink* (color), where as *la rosa* (feminine) translates to *rose* (botany).
+
+6. *Fix*: Ensure data is labeled properly to handle grammatical gender usage. By context the model should know the difference. It should correlate color with pink and not rose. Maybe it'd work if it had to translate "Mi color favorito es el rosa"?
+
+\newpage
+
+@@latex: \noindent@@
+*(c)*
+
+@@latex: \noindent@@
+/i.\\/
+Source Sentence *s: el amor todo lo puede*\\
+Reference Translation $r_1$: love can always find a way\\
+Reference Translation $r_2$: love makes anything possible\\
+NMT Translation $c_1$: the love can always do\\
+NMT Translation $c_2$: love can make anything possible\\
+
+@@latex: \noindent@@
+Please compute the BLEU scores for $c_1$ and $c_2$. Let $\lambda_i = 0.5 \text{ for } i \in \{1, 2\}$ and $\lambda_i = 0 \text{ for }
+i \in \{3, 4\}$ (this means we ignore 3-grams and 4-grams, i.e., don’t compute $p_3$ or $p_4$). When computing BLEU scores, show your working (i.e., show your computed values for $p_1$, $p_2$, $c$, $r^*$, and BP.\\
+
+@@latex: \noindent@@
+*Solution:*\\
+
+@@latex: \noindent@@
+/iii./ Due to data availability, NMT systems are often evaluated with respect to only a
+single reference translation. Please explain (in a few sentences) why this may be problematic.\\
+
+@@latex: \noindent@@
+*Solution*:
+The references are somewhat subjective translations. No translator can be perfect, so certain things can be interpreted differently. Someone translating to or from a non-native tongue may miss idioms and resort to literal translations.\\
+
+@@latex: \noindent@@
+/iv./
+List two advantages and two disadvantages of BLEU, compared to human evaluation,
+as an evaluation metric for Machine Translation.\\
+
+@@latex: \noindent@@
+*Solution:*\\
+\\
+@@latex: \indent@@
+*Advantges:*
+1.
+2.
+
+*Disadvantage:*
+1.
+2.
