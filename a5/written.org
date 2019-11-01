@@ -1,0 +1,63 @@
+#+latex_class_options: [10pt]
+#+LATEX_HEADER: \usepackage[margin=1.25in]{geometry}
+
+
+*Assignment 5 - Written:* Sub-Word Modeling Neural Machine Translation \\
+
+* 1. Character-based convolutional encoder for NMT
+
+*(a)* In Assignment 4 we used 256-dimensional word embeddings ($e_{word}$ = 256),
+while in this assignment, it turns out that a character embedding size of 50 suffices ($e_{char} = 50$).
+In 1-2 sentences, explain one reason why the embedding size used for character-level embeddings is
+typically lower than that used for word embeddings.\\
+
+@@latex:\noindent@@
+*Solution:*
+One reason the embedding size for character-level embeddings is lower is because the character space will most always be smaller than any word space. There's simply more words than characters so we are afforded smaller embedding spaces.\\
+
+
+@@latex:\noindent@@
+*(b)* Write down the total number of parameters in the character-based embedding
+model (Figure 2), then do the same for the word-based lookup embedding model (Figure 1). Write
+each answer as a single expression (though you may show working) in terms of $e_{char}$, k, $e_{word}$,
+$V_{word}$ (the size of the word-vocabulary in the lookup embedding model) and $V_{char}$ (the size of the
+character-vocabulary in the character-based embedding model).\\
+ Given that in our code, $k = 5$, $V_{word} \approx 50,000$ and $V_{char} = 96$, state which model has more parameters, and by what factor (e.g. twice as many? a thousand times as many?)\\
+
+@@latex:\noindent@@
+*Solution:*
+
+1. *character-based embedding*: For the embedding lookup layer we have a weight matrix of size $V_{char} \times e_{char}$. In the convolution layer portion we have a weight matrix of size $f \times e_{char} \times k$ and a bias of size $f$. Note $f$ will be set to $e_{word}$ in our application. Lastly we take into account the number of parameters in the projection and gate layers. Here we have project/gate matrices and biases of size: $e_{word} \times e_{word}$ and $e_{word}$, respectively. So in all we'll have
+
+#+BEGIN_LATEX
+\begin{align*}
+\text{total number of parameters} &= (V_{char} \times e_{char}) + ((f \times e_{char} \times k) + f) + ((e_{word} \times e_{word}) + e_{word})\\
+&= (V_{char} \times e_{char}) + ((e_{word} \times e_{char} \times k) + e_{word}) + ((e_{word} \times e_{word}) + e_{word})\\
+&= V_{char}e_{char} + ke_{word}e_{char} + e_{word} + e_{word}e_{word} + e_{word}\\
+&= \bold{V_{char}e_{char} + ke_{word}e_{char} + e_{word}^2 + 2e_{word}}\\ \\
+&= (96 * 50) + (5 * 256 * 50) + (256^2) + (2*256)\\
+&= \bold{134,848}
+\end{align*}
+#+END_LATEX
+
+2. *word-based lookup embedding*: Note that the word-based embedding model uses a single Embedding layer given a vocabulary and embedding vector size. So in all we'll have:
+
+#+BEGIN_LATEX
+\begin{align*}
+\text{total number of parameters} &= \bold{V_{word} * e_{word}} \\ \\
+&= (50,000 * 256)\\
+&= \bold{2,800,000}
+\end{align*}
+#+END_LATEX
+
+So in all the word embedding model has roughly 20 times more parameters
+than the char-based one.\\
+
+@@latex:\noindent@@
+*(c)* In step 3 of the character-based embedding model, instead of using a 1D convnet, we could have used a RNN instead (e.g. feed the sequence of characters into a bidirectional
+LSTM and combine the hidden states using max-pooling). Explain one advantage of using a convolutional architecture rather than a recurrent architecture for this purpose, making it clear how
+the two contrast.\\
+
+@@latex:\noindent@@
+*Solution:*\\
+*Advantage*:

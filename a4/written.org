@@ -36,8 +36,6 @@ dampen the attention distribution.\\
 #+NAME:   fig:BLEU Scores
 [[./img/bleu_score.png]]
 
-\newpage
-
 @@latex:\noindent@@
 *(j)* Provide one possible advantage and disadvantage of each attention, mechanism
 with respect to either of the other two attention mechanisms.
@@ -56,6 +54,7 @@ where {$v, W, W_1, W_2$} are trainable parameters.\\
    advantage over the additive mechanism.
  - *Disadvantage*: Rigid. Little flexibility compared to the other two.
 
+\newpage
 2. _Multiplicative_
  - *Advantage*: Efficient to compute. The learnable parameter matrix, $W$, allows
    us to transform the source's hidden state vectors in a way that reflects
@@ -116,7 +115,6 @@ where {$v, W, W_1, W_2$} are trainable parameters.\\
 2. *Reason:* The model does not understand unit conversions from metric system (/hectare/) to English based (US & Imperial) systems (/acre/).
 3. *Fix:* Not sure... Teach the model conversions!?
 
-\newpage
 
 @@latex:\noindent@@
 *(b)* Now it is time to explore the outputs of the model that you have trained! The test-set
@@ -156,7 +154,6 @@ the previous question. \\
 
 6. *Fix*: Ensure data is labeled properly to handle grammatical gender usage. By context the model should know the difference. It should correlate color with pink and not rose. Maybe it'd work if it had to translate "Mi color favorito es el rosa"?
 
-\newpage
 
 @@latex: \noindent@@
 *(c)*
@@ -176,6 +173,134 @@ i \in \{3, 4\}$ (this means we ignore 3-grams and 4-grams, i.e., don’t compute
 @@latex: \noindent@@
 *Solution:*\\
 
+$\bold{c_1}$: /the love can always do/
+
+#+BEGIN_LATEX
+\begin{align*}
+p_1 &= \frac{\Sigma_{g \in \{\text{the, love, can, always, do}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_1}(g))}{\Sigma_{g \in \{\text{the, love, can, always, do}\}}Count_{c_1}(g)} \\
+    &= \frac{0 + 1 + 1 + 1 + 0}{5}\\
+    &= \frac{3}{5} \\
+p_2 &= \frac{\Sigma_{g \in \{\text{the love, love can, can always, always do}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_1}(g))}{\Sigma_{g \in \{\text{the love, love can, can always, always do}\}}Count_{c_1}(g)} \\
+    &= \frac{0 + 1 + 1 + 0}{4}\\
+    &= \frac{1}{2}
+\end{align*}
+#+END_LATEX
+
+@@latex: \indent@@
+/Brevity Penalty/:
+$c = len(c_1) = 5$, $r^*=5$. Because $c \geq r^*$
+
+\[ BP = 1 \]
+
+/BLEU/:
+$\lambda_1 = \lambda_2 = 0.5$
+
+#+BEGIN_LATEX
+\begin{align*}
+\text{BLEU}_{c_1} &= BP * exp(\lambda_1log(p_1) + \lambda_2log(p_2))\\
+&= 1 * exp(0.5*log(\frac{3}{5}) + 0.5*log(\frac{2}{4}))\\
+&\approx 0.76994
+\end{align*}
+#+END_LATEX
+
+
+$\bold{c_2}$: /love can make anything possible/
+
+#+BEGIN_LATEX
+\begin{align*}
+p_1 &= \frac{\Sigma_{g \in \{\text{love, can, make, anything, possible}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_2}(g))}{\Sigma_{g \in \{\text{love, can, make, anything, possible}\}}Count_{c_2}(g)} \\
+    &= \frac{1 + 1 + 0 + 1 + 1}{5}\\
+    &= \frac{4}{5} \\
+p_2 &= \frac{\Sigma_{g \in \{\text{love can, can make, make anything, anything possible}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_2}(g))}{\Sigma_{g \in \{\text{love can, can make, make anything, anything possible}\}}Count_{c_2}(g)} \\
+    &= \frac{1 + 0 + 0 + 1}{4}\\
+    &= \frac{1}{2}
+\end{align*}
+#+END_LATEX
+
+@@latex: \indent@@
+/Brevity Penalty/:
+$c = len(c_2) = 5$, and $r^*=5$. Since $c \geq r^*$, we have that
+
+\[ BP = 1 \]
+
+/BLEU/:
+#+BEGIN_LATEX
+\begin{align*}
+\text{BLEU}_{c_2} &= BP * exp(\lambda_1log(p_1) + \lambda_2log(p_2))\\
+&= 1 * exp(0.5*log(\frac{4}{5}) + 0.5*log(\frac{1}{2}))\\
+&\approx 0.81957
+\end{align*}
+#+END_LATEX
+
+$\bold{c_2}$ is considered a better translation according to BLEU. I agree that it is a better translation as $c_1$ doesn't even convey the same meaning as the references.\\
+
+@@latex: \noindent@@
+/ii./ ) Our hard drive was corrupted and we lost Reference Translation r2. Please recompute BLEU scores for c1 and c2, this time with respect to r1 only. Which of the two NMT translations now receives the higher BLEU score? Do you agree that it is the better translation\\
+
+@@latex: \noindent@@
+*Solution*:\\
+
+$\bold{c_1}$: /the love can always do/
+
+#+BEGIN_LATEX
+\begin{align*}
+p_1 &= \frac{\Sigma_{g \in \{\text{the, love, can, always, do}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_1}(g))}{\Sigma_{g \in \{\text{the, love, can, always, do}\}}Count_{c_1}(g)} \\
+    &= \frac{0 + 1 + 1 + 1 + 0}{5}\\
+    &= \frac{3}{5} \\
+p_2 &= \frac{\Sigma_{g \in \{\text{the love, love can, can always, always do}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_1}(g))}{\Sigma_{g \in \{\text{the love, love can, can always, always do}\}}Count_{c_1}(g)} \\
+    &= \frac{0 + 1 + 1 + 0}{4}\\
+    &= \frac{1}{2}
+\end{align*}
+#+END_LATEX
+
+@@latex: \indent@@
+/Brevity Penalty/:
+$c = len(c_1) = 5$, $r^*=5$. Because $c \geq r^*$
+
+\[ BP = 1 \]
+
+/BLEU/:
+$\lambda_1 = \lambda_2 = 0.5$
+
+#+BEGIN_LATEX
+\begin{align*}
+\text{BLEU}_{c_1} &= BP * exp(\lambda_1log(p_1) + \lambda_2log(p_2))\\
+&= 1 * exp(0.5*log(\frac{3}{5}) + 0.5*log(\frac{2}{4}))\\
+&\approx 0.76994
+\end{align*}
+#+END_LATEX
+
+$\bold{c_2}$: /love can make anything possible/
+
+#+BEGIN_LATEX
+\begin{align*}
+p_1 &= \frac{\Sigma_{g \in \{\text{love, can, make, anything, possible}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_2}(g))}{\Sigma_{g \in \{\text{love, can, make, anything, possible}\}}Count_{c_2}(g)} \\
+    &= \frac{1 + 1 + 0 + 0 + 0}{5}\\
+    &= \frac{2}{5} \\
+p_2 &= \frac{\Sigma_{g \in \{\text{love can, can make, make anything, anything possible}\}} min(max_{i=1, 2} Count_{r_i}(g), Count_{c_2}(g))}{\Sigma_{g \in \{\text{love can, can make, make anything, anything possible}\}}Count_{c_2}(g)} \\
+    &= \frac{1 + 0 + 0 + 0}{4}\\
+    &= \frac{1}{4}
+\end{align*}
+#+END_LATEX
+
+@@latex: \indent@@
+/Brevity Penalty/:
+$c = len(c_2) = 5$, and $r^*=5$. Since $c \geq r^*$, we have that
+
+\[ BP = 1 \]
+
+/BLEU/:
+#+BEGIN_LATEX
+\begin{align*}
+\text{BLEU}_{c_2} &= BP * exp(\lambda_1log(p_1) + \lambda_2log(p_2))\\
+&= 1 * exp(0.5*log(\frac{2}{5}) + 0.5*log(\frac{1}{4}))\\
+&\approx 0.60653
+\end{align*}
+#+END_LATEX
+
+Now $\bold{c_1}$ receives a higher score. I do not agree $c_1$ is a better translation.
+
+
 @@latex: \noindent@@
 /iii./ Due to data availability, NMT systems are often evaluated with respect to only a
 single reference translation. Please explain (in a few sentences) why this may be problematic.\\
@@ -194,9 +319,9 @@ as an evaluation metric for Machine Translation.\\
 \\
 @@latex: \indent@@
 *Advantges:*
-1.
-2.
+1. It is a single simple quantitative score that removes subjectiveness from the evaluation process.
+2. Fast to compute as opposed to forcing humans to evaluate translations.
 
 *Disadvantage:*
-1.
-2.
+1. It lacks the ability to evaluate sentence/corpus semantics.
+2. It lacks the ability to evaluate structure/positions.
