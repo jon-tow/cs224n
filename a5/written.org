@@ -59,5 +59,18 @@ LSTM and combine the hidden states using max-pooling). Explain one advantage of 
 the two contrast.\\
 
 @@latex:\noindent@@
+*Solution:* A 1D convnet allows us to naturally work with character level n-grams by constricting the receptive field (kernel) size of the convolution to $n$. This allows us to extract local morphemic features of a word that are not influenced by the characters outside of the field's current position over said word. In contrast, an RNN can only visit characters of a word sequentially from beginning-to-end and (or) end-to-beginning. This suggests that hidden character embeddings outside of a morphemic n-gram region can leak into its representation which is undesirable because they most likely lack any substructure affinity. Building up word embeddings from character sequences through an RNN would not give us the morpheme-like representation we're aiming for.
+\\
+
+@@latex:\noindent@@
+*(d)* In lectures we learned about both max-pooling and average-pooling. For each
+pooling method, please explain one advantage in comparison to the other pooling method. For
+each advantage, make it clear how the two contrast, and write to a similar level of detail as in the
+example given in the previous question.\\
+
+@@latex:\noindent@@
 *Solution:*\\
-*Advantage*:
+
+*max-pooling*: Max pooling compresses an input by extracting the most amplified activation signals in each windowed region of the input. By choosing the strongest signals, we ensure that the most prominent features in a region of a sequence get taken upstream as /the/ region's representative. The advantage is that the max signal will, in many cases, provide the best summary (most important feature) of its region and in turn produce better word representations that are locally invariant to changes. In contrast, average pooling does not always pass on the strongest possible signal. They can get "watered" down considerably by small neighboring activations (attack of the outliers!).\\
+
+*average-pooling*: Average pooling compresses an input by extracting the average activation signals of each windowed region of the input. It has the advantage that it can take regions with a majority of large feature signals and output a smooth summary of the neighborhood so as to maintain some information provided by a minority of weak signals. On the other hand, max pooling would completely discard such rare signals, even if they are somewhat helpful in depicting the region.
