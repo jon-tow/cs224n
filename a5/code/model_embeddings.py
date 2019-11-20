@@ -90,7 +90,7 @@ class ModelEmbeddings(nn.Module):
         # Tensor: (src_len * b, m_word, e_char)
         emb_reshaped = emb \
             .reshape(emb.size(0) * emb.size(1), emb.size(2), emb.size(3)) \
-            .permute(0, 2, 1)            # Tensor: (src_len * b, e_char, m_word)
+            .permute(0, 2, 1)         # Tensor: (src_len * b, e_char, m_word)
 
         # 3. Combine character embeddings using 1-dimensional convolutions.
         conv_out = self.cnn(emb_reshaped)  # Tensor: (src_len * b, e_word)

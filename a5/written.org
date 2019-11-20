@@ -70,7 +70,7 @@ over said word. In contrast, an RNN can only visit characters of a word sequenti
 beginning-to-end and/or end-to-beginning. This suggests that hidden character embeddings outside of
 a morphemic n-gram region can leak into the region's representation even though they will most
 likely lack any substructural word affinity. Therefore building up word embeddings from character
-sequences through an RNN may not embed the morpheme-like representation we'd enjoy with the 1D
+sequences through an RNN may not embed the morpheme-like representations we'd enjoy with the 1D
 conv.\\
 
 @@latex:\noindent@@
@@ -84,4 +84,16 @@ example given in the previous question.\\
 
 *max-pooling*: Max pooling compresses an input by extracting the most amplified activation signals in each windowed region of the input. By choosing the strongest signals, we ensure that the most prominent features in a region of a sequence get taken upstream as /the/ region's representative. The advantage is that the max signal will, in many cases, provide the best summary (most important feature) of its region and in turn produce better word representations that are locally invariant to changes. In contrast, average pooling does not always pass on the strongest possible signal. They can get "watered" down considerably by small neighboring activations (attack of the outliers!).\\
 
-*average-pooling*: Average pooling compresses an input by extracting the average activation signals of each windowed region of the input. It has the advantage that it can take regions with a majority of large feature signals and output a smooth summary of the neighborhood so as to maintain some information provided by a minority of weak signals. On the other hand, max pooling would completely discard such rare signals, even if they are somewhat helpful in depicting the region.
+*average-pooling*: Average pooling compresses an input by extracting the average activation signals of each windowed region of the input. It has the advantage that it can take regions with a majority of large feature signals and output a smooth summary of the neighborhood so as to maintain some information provided by a minority of weak signals. On the other hand, max pooling would completely discard such rare signals, even if they are somewhat helpful in depicting the region.\\
+
+@@latex:\noindent@@
+*(h)* Highway Network: Once you’ve finished testing your module, write a short description of the tests you carried out, and why you believe they are sufficient. \\
+
+@@latex:\noindent@@
+*Solution:* Testing was conducted by checking that the input and output shapes, batch dimension included, stayed the same after applying the layer, as required by highway networks (see Section 2. of the paper Highway Networks). I believe this is sufficient because the highway network is a rather simple linear transformation. \\
+
+@@latex:\noindent@@
+*(i)* CNN: Once you’ve finished testing your module, write a short description of the tests you carried out, and why you believe they are sufficient. \\
+
+@@latex:\noindent@@
+*Solution:* Testing was performed by checking shapes for the convolution activations prior to maxpooling to ensure the one-dimensional convolution layer produced the necessary shapes.

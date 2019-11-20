@@ -17,9 +17,9 @@ class Highway(nn.Module):
     Highway Network Network for Character-Level Embedding.
 
     Named Dimensions:
-    - b      = batch size
+    - b       = batch size
     - src_len = length of sentence
-    - e_word = word embedding length
+    - e_word  = word embedding length
     """
 
     def __init__(self, input_size):
