@@ -96,4 +96,11 @@ example given in the previous question.\\
 *(i)* CNN: Once you’ve finished testing your module, write a short description of the tests you carried out, and why you believe they are sufficient. \\
 
 @@latex:\noindent@@
-*Solution:* Testing was performed by checking shapes for the convolution activations prior to maxpooling to ensure the one-dimensional convolution layer produced the necessary shapes.
+*Solution:* Testing was performed by checking shapes for the convolution activations prior to maxpooling to ensure the one-dimensional convolution layer produced the necessary shapes.\\
+
+@@latex:\noindent@@
+*(f)* Please report the model's corpus BLEU Score.
+
+#+CAPTION: The model's corpus BLEU Score is roughly 24.51
+#+NAME:   fig:BLEU Scores
+[[./img/2(f)_bleu_score.png]]

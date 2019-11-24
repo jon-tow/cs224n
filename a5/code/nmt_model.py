@@ -159,7 +159,8 @@ class NMT(nn.Module):
             max_word_len = target_padded_chars.shape[-1]
 
             target_words = target_padded[1:].contiguous().view(-1)
-            target_chars = target_padded_chars[1:].view(-1, max_word_len)
+            target_chars = target_padded_chars[1:].contiguous(
+            ).view(-1, max_word_len)
             target_outputs = combined_outputs.view(-1, 256)
 
             # torch.index_select(target_chars, dim=0, index=oovIndices)
@@ -242,14 +243,22 @@ class NMT(nn.Module):
                ) -> torch.Tensor:
         """Compute combined output vectors for a batch.
         @param enc_hiddens (Tensor): Hidden states (b, src_len, h*2), where
-                                     b = batch size, src_len = maximum source sentence length, h = hidden size.
+                                     b = batch size, src_len = maximum source
+                                     sentence length, h = hidden size.
         @param enc_masks (Tensor): Tensor of sentence masks (b, src_len), where
-                                     b = batch size, src_len = maximum source sentence length.
-        @param dec_init_state (tuple(Tensor, Tensor)): Initial state and cell for decoder
-        @param target_padded (Tensor): Gold-standard padded target sentences (tgt_len, b, max_word_length), where
-                                       tgt_len = maximum target sentence length, b = batch size.
-        @returns combined_outputs (Tensor): combined output tensor  (tgt_len, b,  h), where
-                                        tgt_len = maximum target sentence length, b = batch_size,  h = hidden size
+                                   b = batch size, src_len = maximum source
+                                   sentence length.
+        @param dec_init_state (tuple(Tensor, Tensor)): Initial state and cell
+                                                       for decoder
+        @param target_padded (Tensor): Gold-standard padded target sentences
+                                       (tgt_len, b, max_word_length), where
+                                       tgt_len = maximum target sentence length,
+                                       b = batch size.
+        @returns combined_outputs (Tensor): combined output tensor
+                                           (tgt_len, b,  h), where
+                                           tgt_len = maximum target sentence length,
+                                           b = batch_size,
+                                           h = hidden size
         """
         # Chop of the <END> token for max length sentences.
         target_padded = target_padded[:-1]

@@ -10,6 +10,17 @@ import torch.nn as nn
 
 
 class CharDecoder(nn.Module):
+    """
+    Character level decoder.
+
+    Named Dimensions:
+    - l = length of input
+    - b = batch size
+    - h = hidden size
+    - e_char = character embedding size
+    - v = vocabulary size
+    """
+
     def __init__(self, hidden_size, char_embedding_size=50, target_vocab=None):
         """ Init Character Decoder.
 
@@ -56,12 +67,6 @@ class CharDecoder(nn.Module):
 
         decoderCharEmb -> charDecoder -> char_output_projection
 
-        l = length of input
-        b = batch size
-        h = hidden size
-        e_char = character embedding size
-        v = vocabulary size
-
         @param input: tensor of integers, shape (length, batch)
         @param dec_hidden: internal state of the LSTM before reading the input
                            characters. A tuple of two tensors of shape
@@ -80,13 +85,12 @@ class CharDecoder(nn.Module):
         char_embeds = self.decoderCharEmb(input)  # Tensor: (l, b, e_char)
 
         # 2. Run the embeddings through a unidirectional LSTM.
-        dec_hiddens, (last_hidden, last_cell) = self.charDecoder(
+        output, dec_hidden = self.charDecoder(
             char_embeds, dec_hidden)  # Tensor(l, b, h) (Tensor(1, b, h), Tensor(1, b, h))
 
-        # 3. Project the scores to the `vocab_size` to get scores for each word
-        #    in the input.
-        scores = self.char_output_projection(dec_hiddens)  # Tensor: (l, b, v)
-        dec_hidden = (last_hidden, last_cell)  # pair(Tensor: (1, b, h))
+        # 3. Project the scores to the `vocab_size` to get scores for each
+        #    character in the input.
+        scores = self.char_output_projection(output)  # Tensor: (l, b, v)
 
         return scores, dec_hidden
 
@@ -115,7 +119,18 @@ class CharDecoder(nn.Module):
         # - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the
         #   handout (e.g., <START>,m,u,s,i,c,<END>).
 
+        # 1. Remove <END> token, get scores, and permute them.
+        input = char_sequence[:-1]    # Remove <END> token.
+        scores, _ = self.forward(input, dec_hidden)  # Tensor: (l, b, h)
+        scores = scores.permute(1, 2, 0)  # Tensor: (b, v, l)
+
+        # 2. Remove <START> tokens from target sequence and permute.
+        target = char_sequence[1:] \
+            .permute(1, 0)  # Remove <START> token and permute. Tensor: (b, l)
         loss_char_dec = nn.CrossEntropyLoss(reduction='sum')
+        loss = loss_char_dec(scores, target)
+
+        return loss
 
         # END YOUR CODE
 
@@ -143,5 +158,34 @@ class CharDecoder(nn.Module):
         #   That is, use the character '{' for <START> and '}' for <END>.
         # Their indices are self.target_vocab.start_of_word and
         # self.target_vocab.end_of_word, respectively.
+
+        # Setup constants.
+        _, batch_size, _ = initialStates[0].shape
+        START, END = self.target_vocab.start_of_word, self.target_vocab.end_of_word
+
+        output_words = [""] * batch_size
+        start_char_ids = [[START] * batch_size]
+        current_char_ids = torch.tensor(
+            start_char_ids, device=device)  # Tensor: (1, b)
+        current_states = initialStates  # Tensor: (1, b, h), Tensor: (1, b, h)
+        for _ in range(max_length):
+            # Tensor: (1, b, v), (Tensor: (1, b, h), Tensor: (1, b, h))
+            scores, current_states = self.forward(
+                current_char_ids, current_states)
+            probabilities = torch.softmax(
+                scores.squeeze(0), dim=1)  # Tensor: (b, v)
+            current_char_ids = torch.argmax(
+                probabilities, dim=1).unsqueeze(0)  # Tensor: (1, b)
+            # Append each batch word with their estimated character.
+            for i, c in enumerate(current_char_ids.squeeze(dim=0)):
+                output_words[i] += self.target_vocab.id2char[int(c)]
+
+        # Truncate output words by removing <END> characters from output words.
+        decodedWords = []
+        for word in output_words:
+            end_pos = word.find(self.target_vocab.id2char[END])
+            decodedWords.append(word if end_pos == -1 else word[:end_pos])
+
+        return decodedWords
 
         # END YOUR CODE
