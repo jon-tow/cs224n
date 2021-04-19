@@ -130,7 +130,7 @@ class NMT(nn.Module):
 
         source_padded_chars = self.vocab.src.to_input_tensor_char(
             source, device=self.device)  # Tensor: (src_len, b, max_word_length)
-        target_padded_chars = self.vocab.src.to_input_tensor_char(
+        target_padded_chars = self.vocab.tgt.to_input_tensor_char(
             target, device=self.device)  # Tensor: (src_len, b, max_word_length)
         target_padded = self.vocab.tgt.to_input_tensor(
             target, device=self.device)  # Tensor: (src_len, b)
